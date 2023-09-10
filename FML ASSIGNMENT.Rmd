@@ -1,0 +1,50 @@
+---
+title: "Assignment 1"
+output: html_document
+date: "2023-09-09"
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+(1)Data-set name:"Most Streamed Spotify Songs 2023"
+
+```{r}
+library(tidyverse)
+
+#The dataset used is taken from "Kaggle" site
+#"https://www.kaggle.com/datasets/nelgiriyewithana/top-spotify-songs-2023"
+
+# (2) Dataset loading
+
+spotify <- read_csv("/Users/ritikakalyani/Downloads/ritika/spotify-2023.csv")
+head(spotify)
+spec(spotify)
+
+#(3)(a) Descriptive statistics for selection of quantitative variables 
+
+summary(spotify[,3:7])
+
+##(3)(b) Descriptive statistics for selection of qualitative variables 
+
+summary(spotify[,1:2])
+summary(spotify[,16:17])
+
+
+#(4) Variable transformation
+
+spotify$Log_in_spotify_playlists <- log(spotify$in_spotify_playlists)
+print(head(spotify$Log_in_spotify_playlists))
+
+spotify$beats_per_minute <- sqrt(spotify$bpm)
+print(head(spotify$beats_per_minute))
+
+#(5)(a) Plotting of one quantitative variable
+
+hist(spotify$artist_count, main = "Histogram of artist count for each track", xlab = "Artist Count")
+
+#(5)(b)Scatter plot 
+
+plot(spotify$released_month, spotify$released_year,main= "Scatter plot for released month and released year", xlab="Released Month of track",ylab = "Released Year of track")
+```
+
