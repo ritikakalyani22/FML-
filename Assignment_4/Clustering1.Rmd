@@ -1,0 +1,246 @@
+---
+title: "Assignment-4:Clustering"
+author: "Ritika Kalyani"
+date: "2023-11-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Summary 
+
+We are applying cluster analysis to a dataset containing 21 pharmaceutical companies' financial metrics. The goal of the analysis, which makes use of numerical variables (1 to 9) is to investigate the composition of the pharmaceutical sector. The code is summarized as follows:
+
+Initially,All required R libraries have been loaded.A CSV file called Pharmaceuticals.csv is used to read the pharmaceutical dataset.The dataset's initial few rows are shown.
+
+For clustering, numerical variables ranging from 3 to 11 are chosen (pharma1).Z-score standardization is used to standardize the numerical variables (pharma2).
+The silhouette method and elbow method are used to determine the proper number of clusters (k=5).
+The kmeans function is used to perform K-means clustering with k=5(chosen from tuning methods).
+And cluster centroids, cluster sizes, and a cluster visualization is done.
+The K means algorithm treats all the variables equally during the clustering process because that is what we are using. The mean values of each variable within each cluster are represented by the "centers" that the kmeans function returns; these means together define the centroids of the clusters.
+To visualize and comprehend the properties and structure of the clusters that are formed, use fviz_cluster.Every dot on the output graph denotes a pharmaceutical company.The labels or colors designate which cluster each firm is assigned to.
+The interpretation of cluster characteristics involves analyzing the average values of the numerical variables associated with each cluster.Clusplot and fviz_cluster are used to visualize the clusters.
+
+The created clusters are examined in relation to variables 12 through 14 (Median Recommendation, Location, and Exchange).
+To see how frequently these variables occur within each cluster, bar plots are made.
+
+Using variables Location,Exchange,Median Recommendation from the dataset, suitable names are proposed for each cluster based on the interpretation of its characteristics.
+
+Cluster interpretation based on categorical variables:
+
+Cluster-1: (NYSE/UK/US-based) Diversified Moderate Holdings
+
+Only NYSE-listed companies with moderate buy recommendations are included in this cluster. It takes place in both the US and the UK.
+
+Cluster-2: North American Moderate Holdings(NYSE/Canada/US)
+
+This cluster consists of US and Canadian companies that are listed on the NYSE and have moderate buy recommendations.
+
+Cluster-3: Worldwide Diverse Mean Suggestions(NYSE/Switzerland/ UK,/US)
+
+This cluster consists of NYSE-listed companies with a range of median recommendations (strong buy, hold, moderate buy, and moderate sell). It takes place in the US, the UK, and Switzerland.
+
+Cluster-4:Multinational Moderate Holdings (NYSE/AMEX/NASDAQ/Germany/US)
+
+This cluster of companies has listings on three exchanges (NYSE, AMEX, and NASDAQ) and is recommended for high hold and moderate buy. It is situated in both the US and Germany.
+
+Cluster 5: Moderate Transatlantic Suggestions (NYSE/France/Ireland/US)
+
+Businesses in this cluster, which are solely listed on the NYSE, are advised to sell moderately and buy moderately. It takes place in France, Ireland, and the United States.
+
+From the numerical interpretation we can suggest names of the clusters:
+
+Cluster 1  consists of companies that have lower market capitalization and financial performance metrics, but are comparatively riskier (high beta and leverage).
+
+Cluster 2 Businesses in this cluster are highly profitable and prioritize preserving a high net profit margin. They typically have lower beta values, which denote lower risk.
+
+Cluster 3 Businesses in this cluster are characterized by rapid revenue growth. On the other hand, their asset turnover and Price/Earnings (PE) ratios are lower, indicating a distinct financial approach.
+
+Cluster 4 This cluster of companies is distinguished by its substantial market capitalization and impressive financial performance metrics, such as elevated Return on equity, Return on assest, and asset turnover.
+
+Cluster 5 The companies in this cluster have high Price/Earnings (PE) ratios, indicating that investors are prepared to pay more for these stocks—possibly as a result of projections for future earnings growth.
+
+
+***
+## Problem Statement:
+
+An equities analyst is studying the pharmaceutical industry and would like your help in exploring and understanding the financial data collected by her firm. Her main objective is to understand the structure of the pharmaceutical industry using some basic financial measures. Financial data gathered on 21 firms in the pharmaceutical industry are available in the file Pharmaceuticals.csv .For each firm, the following variables are recorded:  
+
+1.Market capitalization (in billions of dollars)
+
+2.Beta
+
+3.Price/earnings ratio
+
+4.Return on equity
+
+5.Return on assets
+
+6.Asset turnover
+
+7.Leverage
+
+8.Estimated revenue growth
+
+9.Net profit margin
+
+10.Median recommendation (across major brokerages)
+
+11.Location of firm’s headquarters
+
+12.Stock exchange on which the firm is listed
+
+Use cluster analysis to explore and analyze the given dataset as follows: 
+
+1.Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. 
+
+2.Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)
+
+3.Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+## Answers:
+
+## Data Import and Cleaning
+
+## *First,load the required libraries*
+```{r}
+library(ggplot2)
+library(factoextra)
+library(flexclust)
+library(cluster)
+library(tidyverse)
+library(class)
+library(e1071)
+library(caret)
+```
+
+## *Read the data*
+
+```{r}
+pharma <- read.csv("/Users/ritikakalyani/Downloads/Pharmaceuticals.csv")
+head(pharma)
+```
+
+***
+
+## Questions
+
+***
+
+## *1.Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on.*
+
+```{r}
+#Remove any na values
+pharma <- na.omit(pharma) #provides us with the data post eliminating the incomplete cases.
+head(pharma)
+#Selecting only the numerical variables:
+pharma1<- pharma[,3:11]
+head(pharma1)
+#Scaling the numerical variables using z-score standardization:
+pharma2<-scale(pharma1)
+head(pharma2)
+#To determine the numb er of clusters we can use elbow Method
+fviz_nbclust(pharma2, kmeans, method = "wss") + labs(subtitle = "Elbow Method")
+#Silhouette method
+fviz_nbclust(pharma2, kmeans, method = "silhouette")+ labs(subtitle = "Silhouette Method")
+#From the graph we can see that the 5 is the appropriate number of clusters i.e, k=5
+```
+
+**We have considered numerical variables hence kmeans clustering is the best choice for this scenario where we are using financial measures such as market capitalization,price,earnings,etc.**
+
+**Here,the number of clusters are considered based on average silhouette method which is '5'(as seen from the graph)**
+
+**fviz_cluster is used for visualization to understand the structure and characteristics of the clusters formed.In the output graph,each point represents a pharmaceutical firm.The colors or labels indicate the assigned cluster to each firm.**
+
+```{r}
+#K-means clustering
+set.seed(120)
+k_means <- kmeans(pharma2, centers = 5, nstart = 25)
+#Centroids of clusters
+k_means$centers
+#Size of each cluster
+k_means$size
+#Visualizing the clusters
+fviz_cluster(k_means,data = pharma2) 
+k_means
+dist<- dist(pharma2, method = "euclidean")
+fviz_dist(dist)
+#Fitting the data with 5 clusters
+fitting<-kmeans(pharma2,5)
+
+#Finding the mean value of all quantitative variables for each cluster
+aggregate(pharma2,by=list(fitting$cluster),FUN=mean)
+pharma3<-data.frame(pharma2,fitting$cluster)
+pharma3
+#To view the clusters plot
+library(cluster)
+clusplot(pharma2,fitting$cluster, color = TRUE, shade = TRUE, 
+         labels = 2,
+         lines = 0)
+```
+
+## *2.Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)*
+```{r}
+aggregate(pharma2, by = list(fitting$cluster), FUN = mean)
+pharma4 <- data.frame(pharma2,k_means$cluster)
+pharma4
+```
+**Cluster:1 - Firm no.: 6, 8, 12**
+*Cluster-1 has high Beta,Leverage and lowest Market_Cap,ROE,ROA,Leverage,Rev_Growth,Net_Profit_Margin*
+
+**Cluster:2 - Firm no.: 1,9,16,4,10,7,21**
+*Cluster-2 has high Net_Profit_Margin and low Beta.*
+
+**Cluster:3 - Firm no.: 9,14**
+*Cluster-3 has high Rev_Growth and low PE_Ratio, Asset_Turnover.*
+
+**Cluster:4 - Firm no.: 13,15,11,17**
+*Cluster 4 has high Market_Cap, ROE, ROA,Asset_Turnover* 
+
+**Cluster:5 - Firm no.: 2,18,3,20,5**
+*Cluster 5 has high PE_Ratio.*
+
+## *Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)*
+
+```{r}
+pharma5 <- pharma[12:14] %>% mutate(Clusters=k_means$cluster)
+ggplot(pharma5, mapping = aes(factor(Clusters), fill =Median_Recommendation))+geom_bar(position='dodge')+labs(x ='Clusters',y ='Frequence')
+ggplot(pharma5, mapping = aes(factor(Clusters),fill = Location))+
+  geom_bar(position = 'dodge')+labs(x ='Clusters',y = 'Frequence')
+ggplot(pharma5, mapping = aes(factor(Clusters),fill = Exchange))+geom_bar(position = 'dodge')+
+  labs(x ='Clusters',y = 'Frequence')
+```
+
+**Cluster-1:** *The firms in 1st cluster has only NYSE exchange(which has largest participants),and the firms have hold and moderate buy median recommendations,the cluster has two locations UK and US.*
+
+**Cluster-2:** *The firms in 2nd cluster has only NYSE exchange(which has relatively largest participants),and the firms have hold and moderate buy median recommendations,the cluster has two locations Canada and US.*
+
+**Cluster-3:** *The firms in 3rd cluster has only NYSE exchange(which has largest participants compared to all clusters),and the firms have highest hold,moderate buy,relatively high moderate sell and strong buy median recommendations,the cluster has three locations Switzerland,UK and high frequency US.*
+
+**Cluster-4:** *The firms in 4th cluster has all NYSE,AMEX,NASDAQ exchange,and the firms have high hold and moderate buy median recommendations,the cluster has two locations Germany and US.*
+
+**Cluster-5:** *The firms in 5th cluster has only NYSE exchange(which has largest participants),and the firms have moderate sell and moderate buy median recommendations,the cluster has three locations France,Ireland and US.*
+
+
+## *3.Provide an appropriate name for each cluster using any or all of the variables in the dataset.*
+
+## Cluster-names based on numerical variables:
+
+**Cluster 1:** Poorer financial performance, higher risk.
+
+**Cluster 2:** High returns at reduced risk.
+
+**Cluster 3:** Variable financial strategies combined with strong revenue growth.
+
+**Cluster 4:** Robust financial performance and a substantial market capitalization.
+
+**Cluster 5:** A high PE ratio may be a sign of elevated investor expectations for future growth in profits.
+
+
+
+
